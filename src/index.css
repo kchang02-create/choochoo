@@ -1,0 +1,155 @@
+@import 'tailwindcss';
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    background: #101010;
+  }
+}
+
+.scene {
+  --transition-ease: cubic-bezier(0.65, 0, 0.35, 1);
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #171717;
+  isolation: isolate;
+}
+
+.scene__background {
+  position: absolute;
+  inset: -31.62% 0 auto;
+  width: 100%;
+  height: 163.25%;
+  object-fit: cover;
+  filter: blur(0.32px);
+  transform: scale(1.002);
+}
+
+.scene__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 47%) 0%, rgb(102 102 102 / 47%) 68.269%),
+    rgb(0 0 0 / 61%);
+}
+
+.scene__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scene__frame--focus {
+  opacity: 1;
+  mask-image: linear-gradient(to right, transparent 15%, black 21%);
+  /* collapse: wait for bands to clear before reappearing */
+  transition: opacity 820ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 380ms;
+}
+
+.expanded-bands {
+  position: absolute;
+  inset: 0;
+  transform: scale(0.984);
+  transition: transform 1500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* collapse stagger: Thoughts + Gesture first, Objects + Demographic second, Accessibility last */
+.expanded-band:nth-child(1) { --band-blur: 20px; --band-delay: 0ms; }
+.expanded-band:nth-child(2) { --band-blur: 8px;  --band-delay: 160ms; }
+.expanded-band:nth-child(3) { --band-blur: 12px; --band-delay: 320ms; }
+.expanded-band:nth-child(4) { --band-blur: 8px;  --band-delay: 160ms; }
+.expanded-band:nth-child(5) { --band-blur: 20px; --band-delay: 0ms; }
+
+.expanded-band {
+  clip-path: var(--band-clip);
+  opacity: 0;
+  filter: blur(var(--band-blur, 8px));
+  will-change: opacity, filter;
+  transition:
+    opacity 720ms cubic-bezier(0.4, 0, 0.2, 1) var(--band-delay),
+    filter 1400ms cubic-bezier(0.22, 1, 0.36, 1) var(--band-delay);
+}
+
+/* expand stagger: Objects + Demographic first, Accessibility second, Thoughts + Gesture last */
+.scene--expanded .expanded-band:nth-child(1) { --band-delay: 140ms; }
+.scene--expanded .expanded-band:nth-child(2) { --band-delay: 0ms; }
+.scene--expanded .expanded-band:nth-child(3) { --band-delay: 160ms; }
+.scene--expanded .expanded-band:nth-child(4) { --band-delay: 0ms; }
+.scene--expanded .expanded-band:nth-child(5) { --band-delay: 140ms; }
+
+.scene--expanded .scene__frame--focus {
+  opacity: 0;
+  /* expand: fade out immediately, no delay */
+  transition-delay: 0ms;
+}
+
+.scene--expanded .expanded-bands {
+  transform: scale(1);
+}
+
+.scene--expanded .expanded-band {
+  opacity: 1;
+  filter: blur(0px);
+}
+
+@media (max-aspect-ratio: 4 / 3) {
+  .scene__background {
+    inset: 0;
+    height: 100%;
+    object-position: center;
+  }
+}
+
+.transition-control {
+  position: absolute;
+  right: clamp(20px, 3vw, 48px);
+  bottom: clamp(20px, 3vw, 44px);
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  min-width: 86px;
+  padding: 10px 0;
+  color: rgb(255 255 255 / 66%);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: color 200ms ease;
+}
+
+.transition-control:hover,
+.transition-control:focus-visible {
+  color: white;
+}
+
+.transition-control:focus-visible {
+  outline: 1px solid white;
+  outline-offset: 8px;
+}
+
+.transition-control__line {
+  display: block;
+  height: 1px;
+  background: currentcolor;
+  transform-origin: left;
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.transition-control:hover .transition-control__line {
+  transform: scaleX(0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene__frame,
+  .transition-control__line {
+    transition-duration: 1ms;
+  }
+}
